@@ -9,19 +9,27 @@ export default class MovieAPI {
     };
   }
 
-  getRatedMovies = async (page = 1, language = "ru") => {
-    const path = "movie/top_rated";
-    const query = `${this.url}${path}?${new URLSearchParams({
-      language: language,
-      page: { page },
-    })}`;
+  getResponse = async (path, paramsObj = {}) => {
+    const query = `${this.url}${path}?${new URLSearchParams(paramsObj)}`;
     const response = await fetch(query, this.reqHeaders);
     const result = await response.json();
-
     if (response.ok) {
-      return result.results;
+      return result;
     } else {
-      throw new Error("Ошибка получения списка фильмов " + response.status);
+      throw new Error("Ошибка " + response.status);
+    }
+  };
+
+  getRatedMovies = async (page = 1, language = "ru") => {
+    try {
+      const response = await this.getResponse("movie/top_rated", {
+        language: language,
+        page: { page },
+      });
+      return this.parseList(response.results);
+    } catch (err) {
+      console.log(err.message);
+      console.log(err.stack);
     }
   };
   getImage = async (imgPath) => {
@@ -35,34 +43,45 @@ export default class MovieAPI {
     }
   };
   getGenre = async (id, language = "ru") => {
-    const path = "genre/movie/list";
-    const query = `${this.url}${path}?${new URLSearchParams({
-      language: language,
-    })}`;
-    const response = await fetch(query, this.reqHeaders);
-    const responseObj = await response.json();
-    const result = responseObj.genres.find((el) => el.id === id);
-    if (response.ok) {
-      return result.name;
-    } else {
-      throw new Error("Ошибка получения списка жанров " + response.status);
+    try {
+      const response = await this.getResponse("genre/movie/list", {
+        language: language,
+      });
+      const genreName = response.genres.find((el) => el.id === id).name;
+      return genreName;
+    } catch (err) {
+      console.log(err.message);
+      console.log(err.stack);
     }
   };
   getSearchedList = async (searchString, page = 1, language = "ru") => {
-    const searchQuery = encodeURIComponent(searchString);
-    const path = "search/movie";
-    const query = `${this.url}${path}?${new URLSearchParams({
-      language: language,
-      page: page,
-      query: searchQuery,
-    })}`;
-    const response = await fetch(query, this.reqHeaders);
-    const result = response.json();
-
-    if (response.ok) {
-      return result.results;
-    } else {
-      throw new Error("Ошибка получения списка по поиску " + response.status);
+    try {
+      const searchQuery = encodeURIComponent(searchString);
+      const response = await this.getResponse("search/movie", {
+        language: language,
+        page: page,
+        query: searchQuery,
+      });
+      return this.parseList(response.results);
+    } catch (err) {
+      console.log(err.message);
+      console.log(err.stack);
     }
+  };
+
+  parseList = async (list) => {
+    const parsedList = list.map(async (movie) => {
+      const genres = await Promise.all(
+        movie.genre_ids.map((id) => this.getGenre(id))
+      );
+      return {
+        img: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
+        title: movie.title,
+        description: movie.overview,
+        genres: genres,
+        date: movie.release_date,
+      };
+    });
+    return Promise.all(parsedList);
   };
 }
