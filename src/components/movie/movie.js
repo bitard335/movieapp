@@ -1,4 +1,6 @@
 import { Component } from "react";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 
 export default class Movie extends Component {
   static defaultProps = {
@@ -10,17 +12,32 @@ export default class Movie extends Component {
 
   state = {};
 
+  shortenDescription = (description, maxlength) => {
+    if (description.length <= maxlength) {
+      return description;
+    } else {
+      const words = description.split(" ");
+      let shortDesc = "";
+      words.forEach((word) => {
+        if ((shortDesc + word).length <= maxlength) shortDesc += word + " ";
+      });
+      return shortDesc + "...";
+    }
+  };
+
   render() {
-    const { img, title, date, genreCollection, description } = this.props;
+    const { img, title, date, genres, description } = this.props;
+    const shortDescription = this.shortenDescription(description, 180);
+    const formatedDate = format(new Date(date), "PPP", { locale: ru });
 
     return (
       <li className="movie">
         <img className="movie__image" src={img} alt="movieimage" />
         <div className="movie__main">
           <h5 className="movie__title">{title}</h5>
-          <div className="movie__date">{date}</div>
+          <div className="movie__date">{formatedDate}</div>
           <ul className="movie__genreList">
-            {genreCollection.map((genre, index) => {
+            {genres.map((genre, index) => {
               return (
                 <li className="movie__genre" key={index}>
                   <p>{genre}</p>
@@ -28,7 +45,7 @@ export default class Movie extends Component {
               );
             })}
           </ul>
-          <div className="movie__description">{description}</div>
+          <div className="movie__description">{shortDescription}</div>
         </div>
       </li>
     );

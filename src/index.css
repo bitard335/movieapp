@@ -1,4 +1,5 @@
 @import "./base.css";
+@import "./fonts/fonts.css";
 @import "./components/movieApp/movieApp.css";
 @import "./components/movie/movie.css";
 @import "./components/movieList/movieList.css";
