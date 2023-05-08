@@ -1,5 +1,7 @@
 .movieApp {
   margin: 0px auto;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   width: 1010px;
+  box-sizing: border-box;
+  padding: 38px;
 }

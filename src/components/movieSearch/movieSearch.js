@@ -1,11 +1,16 @@
-import { Component } from "react";
+import { Component } from 'react';
+import { debounce } from 'lodash';
 
 export default class MovieSearch extends Component {
   render() {
-    return (
-      <form>
-        <input className="movieSearch" placeholder="Поиск"></input>
-      </form>
-    );
+    const { changeSearch, changeFilter } = this.props;
+
+    const onInputHandler = (event) => {
+      changeFilter('search');
+      const inputValue = event.target.value;
+      if (event.target.value.trim()) changeSearch(inputValue);
+    };
+
+    return <input className="movieSearch__input" placeholder="Поиск" onInput={debounce(onInputHandler, 200)} />;
   }
 }

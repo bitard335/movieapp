@@ -1,5 +1,6 @@
-import { Component } from "react";
-import Movie from "../movie/movie";
+import { Component } from 'react';
+
+import Movie from '../movie/movie';
 
 export default class MovieList extends Component {
   render() {

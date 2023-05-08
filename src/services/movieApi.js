@@ -1,7 +1,7 @@
 export default class MovieAPI {
   constructor() {
-    this.imgDB = "https://image.tmdb.org/t/p/original/";
-    this.url = "https://api.themoviedb.org/3/";
+    this.imgDB = 'https://image.tmdb.org/t/p/original';
+    this.url = 'https://api.themoviedb.org/3/';
     this.reqHeaders = {
       headers: {
         Authorization: `Bearer ${process.env.REACT_APP_MOVIE_KEY}`,
@@ -16,66 +16,51 @@ export default class MovieAPI {
     if (response.ok) {
       return result;
     } else {
-      throw new Error("Ошибка " + response.status);
+      throw new Error('Ошибка ' + response.status);
     }
   };
 
-  getRatedMovies = async (page = 1, language = "ru") => {
+  getRatedMovies = async (page = 1, language = 'ru') => {
     try {
-      const response = await this.getResponse("movie/top_rated", {
+      const response = await this.getResponse('movie/top_rated', {
         language: language,
-        page: { page },
+        page: page,
       });
       return this.parseList(response.results);
     } catch (err) {
-      console.log(err.message);
-      console.log(err.stack);
+      throw new Error('Ошибка загрузки фильмов ' + err.stack);
     }
   };
-  getImage = async (imgPath) => {
-    const response = await fetch(this.imgDB + imgPath);
-    const resultImg = await response.blob();
 
-    if (response.ok) {
-      return resultImg;
-    } else {
-      throw new Error("Ошибка получения изображения " + response.status);
-    }
-  };
-  getGenre = async (id, language = "ru") => {
+  getGenre = async (id, language = 'ru') => {
     try {
-      const response = await this.getResponse("genre/movie/list", {
+      const response = await this.getResponse('genre/movie/list', {
         language: language,
       });
       const genreName = response.genres.find((el) => el.id === id).name;
       return genreName;
     } catch (err) {
-      console.log(err.message);
-      console.log(err.stack);
+      throw new Error('Ошибка жанров ' + err.message);
     }
   };
-  getSearchedList = async (searchString, page = 1, language = "ru") => {
+  getSearchedList = async (searchString = '', page = 1, language = 'ru') => {
     try {
-      const searchQuery = encodeURIComponent(searchString);
-      const response = await this.getResponse("search/movie", {
+      const response = await this.getResponse('search/movie', {
         language: language,
         page: page,
-        query: searchQuery,
+        query: searchString,
       });
       return this.parseList(response.results);
     } catch (err) {
-      console.log(err.message);
-      console.log(err.stack);
+      throw new Error('Ошибка поиска фильмов ' + err.message);
     }
   };
 
   parseList = async (list) => {
     const parsedList = list.map(async (movie) => {
-      const genres = await Promise.all(
-        movie.genre_ids.map((id) => this.getGenre(id))
-      );
+      const genres = await Promise.all(movie.genre_ids.map((id) => this.getGenre(id)));
       return {
-        img: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
+        img: this.imgDB + movie.poster_path,
         title: movie.title,
         description: movie.overview,
         genres: genres,

@@ -36,11 +36,10 @@
   font-size: 12px;
   line-height: 15px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
-.movie__genre{
-  padding-right: 8px;
-}
-.movie__genre p {
+.movie__genre {
   background-color: #FAFAFA;
   padding: 2px 4px 3px 5px;
   color: rgba(0, 0, 0, 0.65);
