@@ -1,15 +1,22 @@
 import { Component } from 'react';
 
 import Movie from '../movie/movie';
+import { MoviesConsumer } from '../contextMovies/contextMovies';
 
 export default class MovieList extends Component {
   render() {
-    const { movieList } = this.props;
-
-    const elements = movieList.map((movie, index) => {
-      return <Movie key={index} {...movie} />;
-    });
-
-    return <ul className="movieList">{elements}</ul>;
+    return (
+      <MoviesConsumer>
+        {({ list, api, cookies }) => (
+          <ul className="movieList">
+            {list.map((movie, index) => {
+              return (
+                <Movie key={index} {...movie} cookies={cookies} getImage={api.getImage} addRating={api.addRating} />
+              );
+            })}
+          </ul>
+        )}
+      </MoviesConsumer>
+    );
   }
 }

@@ -4,16 +4,11 @@ export default class Footer extends Component {
   static defaultProps = {
     totalPages: 50,
   };
-  state = {
-    current: 1,
-  };
 
   render() {
-    const { changePage, totalPages } = this.props;
-    const { current } = this.state;
+    const { changePage, totalPages, current } = this.props;
 
     const onChangePage = (page) => {
-      this.setState(() => ({ current: page }));
       changePage(page);
     };
 

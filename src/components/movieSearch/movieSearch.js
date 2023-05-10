@@ -3,10 +3,10 @@ import { debounce } from 'lodash';
 
 export default class MovieSearch extends Component {
   render() {
-    const { changeSearch, changeFilter } = this.props;
+    const { changeSearch, changeTab } = this.props;
 
     const onInputHandler = (event) => {
-      changeFilter('search');
+      changeTab('search');
       const inputValue = event.target.value;
       if (event.target.value.trim()) changeSearch(inputValue);
     };
