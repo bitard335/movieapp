@@ -75,7 +75,6 @@ export default class Movie extends Component {
     const rateHandler = (rate) => {
       addRatedMovie(movieId, rate);
       addRating(movieId, rate, cookies.get('guestSession'));
-      console.log(`Фильм ${movieId} оценен на ${rate}`);
     };
 
     const imgPlug = isLoading ? (
