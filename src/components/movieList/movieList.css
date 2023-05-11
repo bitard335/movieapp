@@ -1,6 +1,8 @@
 .movieList {
   display: flex;
   flex-wrap: wrap;
-  gap: 31px;
+  gap: 36px;
   margin-top: 34px;
+  max-width: 1100;
+  justify-content: space-between;
 }

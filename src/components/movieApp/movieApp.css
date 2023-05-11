@@ -1,11 +1,22 @@
 .movieApp {
   margin: 0px auto;
   background-color: #ffffff;
-  width: 1010px;
+  max-width: 1100px;
   box-sizing: border-box;
   padding: 38px;
 }
 
 .spinner{
   margin-top: 15px;
+}
+
+@media screen and (max-width: 1100px) {
+  .movieApp{
+    width: auto;
+  }
+}
+@media screen and (max-width: 768px) {
+  .movieApp{
+    padding: 16px;
+  }
 }

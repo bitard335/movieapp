@@ -2,16 +2,14 @@ export default class MovieAPI {
   constructor() {
     this.imgDB = 'https://image.tmdb.org/t/p/original/';
     this.url = 'https://api.themoviedb.org/3/';
-    this.reqHeaders = {
-      headers: {
-        Authorization: `Bearer ${process.env.REACT_APP_MOVIE_KEY}`,
-      },
-    };
   }
 
   getResponse = async (path, paramsObj = {}) => {
-    const query = `${this.url}${path}?${new URLSearchParams(paramsObj)}`;
-    const response = await fetch(query, this.reqHeaders);
+    const query = `${this.url}${path}?${new URLSearchParams({
+      ...paramsObj,
+      api_key: process.env.REACT_APP_MOVIE_KEY,
+    })}`;
+    const response = await fetch(query);
     const result = await response.json();
     if (response.ok) {
       return result;
@@ -69,11 +67,13 @@ export default class MovieAPI {
   };
 
   addRating = async (movieId, rate, sessionId) => {
-    const url = `${this.url}movie/${movieId}/rating?${new URLSearchParams({ guest_session_id: sessionId })}`;
+    const url = `${this.url}movie/${movieId}/rating?${new URLSearchParams({
+      guest_session_id: sessionId,
+      api_key: '5df2129fbbf6dbf9dfc5607de1992b5d',
+    })}`;
     fetch(url, {
       method: 'POST',
       headers: {
-        ...this.reqHeaders.headers,
         'Content-Type': 'application/json;charset=utf-8',
       },
       body: JSON.stringify({ value: rate }),
@@ -100,7 +100,7 @@ export default class MovieAPI {
   };
 
   parseList = async (list) => {
-    const parsedList = Promise.all(
+    const parsedList = await Promise.all(
       list.results.map(async (movie) => {
         const genres = await Promise.all(movie.genre_ids.map((id) => this.getGenre(id)));
         return {
@@ -114,6 +114,7 @@ export default class MovieAPI {
         };
       })
     );
-    return parsedList;
+    const responseObj = { result: parsedList, totalPages: list.total_pages };
+    return responseObj;
   };
 }

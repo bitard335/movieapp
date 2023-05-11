@@ -14,10 +14,11 @@ export default class MovieApp extends Component {
     movieList: [],
     isLoading: true,
     errorWhenLoading: false,
-    tab: 'rated',
-    searchQuery: '',
+    tab: 'search',
+    searchQuery: 'Бойцовский клуб',
     page: 1,
     totalPages: 50,
+    ratedMovies: {},
   };
 
   movieAPI = new MovieAPI();
@@ -45,31 +46,35 @@ export default class MovieApp extends Component {
         ? this.movieAPI.getUserRatedMovies(this.cookies.get('guestSession'), page)
         : this.movieAPI.getSearchedList(searchQuery, page);
     movies
-      .then((response) => this.setState({ movieList: response, isLoading: false }))
+      .then((response) =>
+        this.setState({ movieList: response.result, isLoading: false, totalPages: response.totalPages })
+      )
       .catch((err) => {
         this.setState({ isLoading: false, errorWhenLoading: true });
         console.log('Не получилось выполнить запрос');
         console.log(err.stack);
       });
   };
+  addRatedMovie = (id, rate) => {
+    this.setState(({ ratedMovies }) => ({ ratedMovies: { ...ratedMovies, [id]: rate } }));
+  };
 
   componentDidMount() {
     this.movieAPI.getGuestToken().then((guestSession) => {
       const expiresAt = new Date(guestSession.expires_at);
       const guestSessionId = guestSession.guest_session_id;
-      if (!this.cookies.get('guestSession'))
-        this.cookies.set('guestSession', guestSessionId, { path: '/', expires: expiresAt });
+      this.cookies.set('guestSession', guestSessionId, { path: '/', expires: expiresAt });
     });
+
     this.reloadMovies();
   }
   componentDidUpdate(prevProps, prevState) {
     const { tab, page, searchQuery } = this.state;
-    if (tab !== prevState.tab) this.setState({ page: 1 });
     if (tab !== prevState.tab || page !== prevState.page || searchQuery !== prevState.searchQuery) this.reloadMovies();
   }
 
   render() {
-    const { movieList, isLoading, errorWhenLoading, totalPages, page, tab } = this.state;
+    const { movieList, isLoading, errorWhenLoading, totalPages, page, tab, ratedMovies } = this.state;
     const loadPlug = isLoading ? (
       <div className="spinner centered">
         <Spin size="large" />
@@ -80,10 +85,19 @@ export default class MovieApp extends Component {
       movieList.length === 0 && !isLoading && !errorWhenLoading ? (
         <Alert type="warning" message="Список фильмов пуст" />
       ) : (
-        <MoviesProvider value={{ list: movieList, api: this.movieAPI, cookies: this.cookies }}>
+        <MoviesProvider
+          value={{
+            list: movieList,
+            api: this.movieAPI,
+            cookies: this.cookies,
+            ratedMovies: ratedMovies,
+            addRatedMovie: this.addRatedMovie,
+          }}
+        >
           <MovieList />
         </MoviesProvider>
       );
+
     return (
       <div className="movieApp">
         <MovieTabs tab={tab} changeTab={this.changeTab} />
